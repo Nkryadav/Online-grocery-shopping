@@ -55,6 +55,7 @@ router.post('/:productId', protect, async (req, res) => {
             return res.status(400).json({ message: 'You have already reviewed this product' });
         }
 
+        // Create and save review
         const review = new Review({
             user: req.user._id,
             product: req.params.productId,
@@ -63,6 +64,24 @@ router.post('/:productId', protect, async (req, res) => {
         });
 
         await review.save();
+
+        // Update product rating and numReviews
+        const allReviews = await Review.find({ product: req.params.productId });
+        const avgRating = allReviews.reduce((acc, item) => item.rating + acc, 0) / allReviews.length;
+
+        console.log('=== REVIEW UPDATE DEBUG ===');
+        console.log('Product ID:', req.params.productId);
+        console.log('Total Reviews:', allReviews.length);
+        console.log('Average Rating:', avgRating);
+        console.log('Old Rating:', product.rating);
+
+        product.rating = avgRating;
+        product.numReviews = allReviews.length;
+        await product.save();
+
+        console.log('New Rating:', product.rating);
+        console.log('Product saved successfully!');
+        console.log('=========================');
 
         res.status(201).json({ message: 'Review added successfully', review });
     } catch (error) {
@@ -88,6 +107,16 @@ router.put('/:reviewId', protect, async (req, res) => {
         review.comment = req.body.comment || review.comment;
 
         const updatedReview = await review.save();
+
+        // Update product rating
+        const allReviews = await Review.find({ product: review.product });
+        const avgRating = allReviews.reduce((acc, item) => item.rating + acc, 0) / allReviews.length;
+
+        await Product.findByIdAndUpdate(review.product, {
+            rating: avgRating,
+            numReviews: allReviews.length
+        });
+
         res.json({ message: 'Review updated successfully', review: updatedReview });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -108,7 +137,20 @@ router.delete('/:reviewId', protect, async (req, res) => {
             return res.status(401).json({ message: 'Not authorized to delete this review' });
         }
 
+        const productId = review.product;
         await review.deleteOne();
+
+        // Update product rating after deletion
+        const allReviews = await Review.find({ product: productId });
+        const avgRating = allReviews.length > 0
+            ? allReviews.reduce((acc, item) => item.rating + acc, 0) / allReviews.length
+            : 0;
+
+        await Product.findByIdAndUpdate(productId, {
+            rating: avgRating,
+            numReviews: allReviews.length
+        });
+
         res.json({ message: 'Review deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

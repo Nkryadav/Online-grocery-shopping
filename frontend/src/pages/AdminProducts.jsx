@@ -131,16 +131,16 @@ const AdminProducts = () => {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {products.map(product => (
-                        <div key={product._id} className="card p-4">
-                            <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-4" />
-                            <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
-                            <p className="text-white text-sm mb-2">{product.category}</p>
-                            <p className="text-primary-500 font-bold mb-4">₹{product.price} / {product.unit}</p>
+                        <div key={product._id} className="card p-3">
+                            <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded-lg mb-3" />
+                            <h3 className="text-base font-bold text-white mb-1 line-clamp-1">{product.name}</h3>
+                            <p className="text-white text-xs mb-1">{product.category}</p>
+                            <p className="text-primary-500 font-bold mb-3 text-sm">₹{product.price} / {product.unit}</p>
                             <div className="flex gap-2">
-                                <button onClick={() => handleEdit(product)} className="btn-secondary flex-1">Edit</button>
-                                <button onClick={() => handleDelete(product._id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">Delete</button>
+                                <button onClick={() => handleEdit(product)} className="btn-secondary flex-1 text-sm py-1.5">Edit</button>
+                                <button onClick={() => handleDelete(product._id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm">Delete</button>
                             </div>
                         </div>
                     ))}

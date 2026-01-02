@@ -9,6 +9,12 @@ const crypto = require('crypto');
 // Create Razorpay order
 router.post('/create-razorpay-order', protect, async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                message: 'Payment gateway not configured. Please contact administrator.'
+            });
+        }
+
         const { amount } = req.body;
 
         const options = {
@@ -27,6 +33,12 @@ router.post('/create-razorpay-order', protect, async (req, res) => {
 // Verify Razorpay payment
 router.post('/verify-payment', protect, async (req, res) => {
     try {
+        if (!razorpay || !process.env.RAZORPAY_KEY_SECRET) {
+            return res.status(503).json({
+                message: 'Payment gateway not configured. Please contact administrator.'
+            });
+        }
+
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
         const sign = razorpay_order_id + '|' + razorpay_payment_id;
